@@ -1,0 +1,57 @@
+{
+  "actionsSequence": [
+    {
+      "actions": [
+        {
+          "type": "fireScene",
+          "sceneName": 0
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 4,
+          "trackName": "Track1",
+          "sceneName": 0
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 4,
+          "trackName": "Track2",
+          "sceneName": 0
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 4,
+          "trackName": "Track3",
+          "sceneName": 0,
+          "unarmOnStop": 1
+        }
+      ]
+    },
+    {
+      "actions": [
+        {
+          "type": "fireScene",
+          "sceneName": 1
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 2,
+          "trackName": "Track1",
+          "sceneName": 1
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 1,
+          "trackName": "Track2",
+          "sceneName": 1
+        },
+        {
+          "type": "recordLoop",
+          "barCount": 2,
+          "trackName": "Track3",
+          "sceneName": 1
+        }
+      ]
+    }
+  ]
+}

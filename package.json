@@ -1,0 +1,29 @@
+{
+  "name": "loop-conductor",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "watch": {
+    "postbuild": ".dist/**/*.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist .dist",
+    "postbuild": "node ./postProcessDist.js",
+    "prebuild:watch": "tsc",
+    "build:watch": "tsc --watch & npm-watch",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "npm-watch": "^0.11.0",
+    "prettier": "^2.8.7",
+    "rimraf": "^4.4.1",
+    "ts-jest": "^29.0.5"
+  },
+  "dependencies": {
+    "typescript": "^5.0.2"
+  }
+}
