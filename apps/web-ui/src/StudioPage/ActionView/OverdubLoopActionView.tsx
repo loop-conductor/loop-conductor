@@ -1,10 +1,5 @@
-import {
-  Checkbox,
-  FormElement,
-  Input,
-  Label,
-  OverdubLoopAction,
-} from "../../Shared";
+import { OverdubLoopAction } from "@loop-conductor/common";
+import { Checkbox, FormElement, Input, Label } from "../../Shared";
 
 interface Props {
   action: OverdubLoopAction;

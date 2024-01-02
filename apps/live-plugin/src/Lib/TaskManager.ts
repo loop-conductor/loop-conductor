@@ -1,12 +1,24 @@
-import { getIdGenerator, getMaxObjectManager } from "./Globals";
-import { stringifyTime } from "./Time";
-import { Task } from "./Types";
+import { Task, stringifyTime } from "@loop-conductor/common";
 
 type Observer = (tasks: Task[]) => void;
 
 export class TaskManager {
   private scheduledTasks: Record<number, Task> = {};
   private observers: Observer[] = [];
+
+  private parentPatcher: Patcher;
+  private maxObjects: Maxobj[];
+
+  constructor(parentPatcher: Patcher) {
+    this.parentPatcher = parentPatcher;
+    this.maxObjects = [];
+  }
+
+  public newMaxObject(name: string, ...args: unknown[]): Maxobj {
+    const obj = this.parentPatcher.newdefault(500, 500, name, ...args);
+    this.maxObjects.push(obj);
+    return obj;
+  }
 
   public observe(observer: Observer): () => void {
     const i = this.observers.length;
@@ -17,38 +29,48 @@ export class TaskManager {
   }
 
   public reset() {
+    // Remove all the max object
+    for (let i = 0; i < this.maxObjects.length; i++) {
+      this.parentPatcher.remove(this.maxObjects[i]);
+    }
+    this.maxObjects = [];
+
+    // Then clean any scheduled task
+    this.clearScheduledTasks();
+  }
+
+  public clearScheduledTasks() {
+    // Then clean any scheduled task
     this.scheduledTasks = {};
     this.notifyObservers();
   }
 
-  public createTask(args: Omit<Task, "id">): Task {
-    const id = getIdGenerator().id();
-    const task: Task = {
-      id,
-      ...args,
-    };
-    return task;
-  }
+  /**
+   * Schedule a new set of task for execution.
+   * Note that all pending tasks will be cleared before adding the new ones.
+   *
+   * @param tasks The list of tasks to schedule
+   */
+  public scheduleTask(tasks: Task[]): void {
+    // Clear any previous scheduled task before adding new ones
+    this.clearScheduledTasks();
 
-  public scheduleTask(args: { task: Task }): void {
-    const { task } = args;
-    const objectRegistry = getMaxObjectManager();
-    const messageObj = objectRegistry.newObject("message");
-    const bPatcherObj = objectRegistry.newObject(
-      "bpatcher",
-      "TaskRunner.maxpat"
-    );
-    patcher.connect(messageObj, 0, bPatcherObj, 0);
-    messageObj.message(
-      "set",
-      JSON.stringify({
-        taskId: task.id,
-        taskTimepoint: stringifyTime(task.timepoint),
-      })
-    );
-    messageObj.message("bang");
+    // Add the new tasks
+    tasks.forEach((task) => {
+      const messageObj = this.newMaxObject("message");
+      const bPatcherObj = this.newMaxObject("bpatcher", "TaskRunner.maxpat");
+      patcher.connect(messageObj, 0, bPatcherObj, 0);
+      messageObj.message(
+        "set",
+        JSON.stringify({
+          taskId: task.id,
+          taskTimepoint: stringifyTime(task.timepoint),
+        })
+      );
+      messageObj.message("bang");
 
-    this.scheduledTasks[task.id] = task;
+      this.scheduledTasks[task.id] = task;
+    });
     this.notifyObservers();
   }
 

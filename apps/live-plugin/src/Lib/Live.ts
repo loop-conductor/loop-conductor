@@ -1,4 +1,9 @@
-import { SceneName, TimeBeatValue, TimeSignature, TrackName } from "./Types";
+import {
+  SceneName,
+  TimeBeatValue,
+  TimeSignature,
+  TrackName,
+} from "@loop-conductor/common";
 
 export class LiveClip {
   private api: LiveAPI;
@@ -20,8 +25,10 @@ export class LiveClip {
 export class LiveClipSlot {
   private api: LiveAPI;
   private path: string;
-  public constructor(path: string) {
+  private live: Live;
+  public constructor(path: string, live: Live) {
     this.path = path;
+    this.live = live;
     this.api = new LiveAPI(() => {}, path);
   }
 
@@ -57,8 +64,11 @@ export class LiveClipSlot {
 export class LiveTrack {
   private api: LiveAPI;
   private path: string;
-  public constructor(path: string) {
+  private live: Live;
+
+  public constructor(path: string, live: Live) {
     this.path = path;
+    this.live = live;
     this.api = new LiveAPI(() => {}, path);
   }
 
@@ -70,8 +80,9 @@ export class LiveTrack {
     this.api.set("arm", on);
   }
 
-  public getClipSlot(sceneIndex: number): LiveClipSlot {
-    return new LiveClipSlot(this.path + " clip_slots " + sceneIndex);
+  public getClipSlot(sceneName: SceneName): LiveClipSlot {
+    const sceneIndex = this.live.getSceneIndex(sceneName);
+    return new LiveClipSlot(this.path + " clip_slots " + sceneIndex, this.live);
   }
 }
 
@@ -128,7 +139,7 @@ export class Live {
   public getTrack(nameOrIndex: TrackName): LiveTrack {
     const trackIndex = this.getTrackIndex(nameOrIndex);
     var trackPath = "live_set tracks " + trackIndex;
-    return new LiveTrack(trackPath);
+    return new LiveTrack(trackPath, this);
   }
 
   public isValidTrack(nameOrIndex: TrackName): boolean {
@@ -141,51 +152,65 @@ export class Live {
     return new LiveScene(scenePath);
   }
 
-  public isValidScene(nameOrIndex: SceneName): boolean {
-    return this.getSceneIndex(nameOrIndex) >= 0;
+  public isValidSceneName(nameOrIndex: SceneName): boolean {
+    return this.getSceneIndex(nameOrIndex) > 0;
   }
 
   public getTrackCount(): number {
     return this.api.getcount("tracks");
   }
 
+  /**
+   * Translate from a track name to a track index.
+   * Track names are 1-indexed an/or can be strings.
+   * Track indexes are 0-indexed. (They are used by the live api)
+   *
+   * @param trackName The track name
+   * @returns The 0 indexed track index
+   */
   public getTrackIndex(name: TrackName): number {
     const numTracks = this.getTrackCount();
     if (typeof name === "number") {
-      if (name < numTracks) {
-        return name;
+      if (name > 0 && name <= numTracks) {
+        return name - 1;
       }
       return -1;
     }
 
-    for (var i = 0; i < numTracks; i++) {
+    for (var i = 1; i <= numTracks; i++) {
       const track = this.getTrack(i);
       // Get the name of the track
       var trackName = track.getName();
 
       if (trackName == name) {
-        return i;
+        return i - 1;
       }
     }
     return -1;
   }
 
-  public getSceneIndex(name: SceneName): number {
+  /**
+   * Translate from a scene name to a scene index.
+   * Scene names are 1-indexed an/or can be strings.
+   * Scene indexes are 0-indexed. (They are used by the live api)
+   *
+   * @param sceneName The scene name
+   * @returns The 0 indexed scene index
+   */
+  public getSceneIndex(sceneName: SceneName): number {
     const numScenes = this.api.getcount("scenes");
-    if (typeof name === "number") {
-      if (name < numScenes) {
-        return name;
+    if (typeof sceneName === "number") {
+      if (sceneName > 0 && sceneName <= numScenes) {
+        return sceneName - 1;
       }
       return -1;
     }
 
-    for (var i = 0; i < numScenes; i++) {
+    for (var i = 1; i <= numScenes; i++) {
       const scene = this.getScene(i);
       // Get the name of the track
-      var sceneName = scene.getName();
-
-      if (sceneName == name) {
-        return i;
+      if (scene.getName() == sceneName) {
+        return i - 1;
       }
     }
     return -1;

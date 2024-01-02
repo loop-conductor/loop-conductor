@@ -1,4 +1,5 @@
-import { FireClipAction, FormElement, Input, Label } from "../../Shared";
+import { FireClipAction } from "@loop-conductor/common";
+import { FormElement, Input, Label } from "../../Shared";
 
 interface Props {
   action: FireClipAction;

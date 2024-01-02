@@ -1,6 +1,5 @@
+import { PadCount, arrayFind } from "@loop-conductor/common";
 import { getConductorManager, getTaskManager } from "./Globals";
-import { PadCount } from "./Types";
-import { arrayFind } from "./Utils";
 
 const colors = {
   default: [0.9, 0.9, 0.9, 1],
@@ -17,17 +16,17 @@ export class PadsManager {
 
   public observe(observer: Observer): () => void {
     return getTaskManager().observe((tasks) => {
-      const conductor = getConductorManager();
+      const conductorModel = getConductorManager();
       const config = this.getDefaultConfig();
-      if (conductor) {
-        conductor.getSequenceManagers().forEach((sequenceManager, index) => {
+      if (conductorModel) {
+        conductorModel.conductor?.sequences.forEach((sequence, index) => {
           const isActive = !!arrayFind(
             tasks,
-            (task) => task.sequenceId === sequenceManager.getId()
+            (task) => task.sequenceId === sequence.id
           );
 
-          const padId = sequenceManager.getPadId() - 1;
-          const padName = sequenceManager.getName() ?? `Seq${index}`;
+          const padId = sequence.padId - 1;
+          const padName = sequence.name ?? `Seq${index}`;
           config[padId] = this.getPadConfig(
             padName,
             isActive ? "active" : "default"

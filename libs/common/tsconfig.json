@@ -9,12 +9,7 @@
     "lib": [
       "ES5"
     ],
-    "outDir": "../../.dist",
-    "paths": {
-      "@loop-conductor/common": [
-        "../../libs/common/src/index.ts"
-      ],
-    }
+    "outDir": "../../dist/common"
   },
   "include": [
     "src/**/*.ts"

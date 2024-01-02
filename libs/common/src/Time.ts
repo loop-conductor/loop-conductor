@@ -227,3 +227,31 @@ export function isTime(time: unknown): time is Time {
     typeof castedTime.unit === "number"
   );
 }
+
+/**
+ * Return a time matching the start of the next bar plus a given offset (at) .
+ * @param args
+ * @returns
+ */
+export function getNextBarTime(args: {
+  at: number;
+  tSig: TimeSignature;
+  currentBeat: number;
+}): Time {
+  // This safety offset is used to make sure that the task is scheduled
+  // "a bit" before the next bat tick, to leave some room for Live to process the task.
+  const safetyOffset: Duration = "-16n";
+
+  const { at, currentBeat, tSig } = args;
+
+  // Compute a timestamp matching the start of the next bar
+  const nextBarTime = roundToNextBar(beatsToTime(currentBeat, tSig));
+
+  // Then We offset this time a bit, to leave some room for Live to process the task
+  return offsetTime(
+    // First shift timestamp representing the start of the next "at" bar.
+    offsetTime(nextBarTime, barsToTicks(at, tSig), tSig),
+    safetyOffset,
+    tSig
+  );
+}

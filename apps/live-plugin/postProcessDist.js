@@ -13,7 +13,10 @@ const destFolder = projectRoot + "/dist/live-plugin/";
  * path /bob/jo/hi.js becomes bob_jo_hi.js
  */
 function flattenFilePath(pathSegment) {
-  let flatSegment = pathSegment.replace(sourceFolder, "").replaceAll("/", "_");
+  let flatSegment = pathSegment.replace(sourceFolder, "")
+    .replaceAll("/", "_")
+    .replaceAll("apps_live-plugin_src_", "")
+    .replaceAll("libs_common_src_", "common_");
   if (flatSegment.startsWith("_")) {
     flatSegment = flatSegment.substring(1);
   }
@@ -34,6 +37,9 @@ function remapFilePath(filePath) {
  * and return the import path relative to the destination folder ( with no nested folders )
  */
 function remapImportPath(filePath, importFile) {
+  if (importFile.startsWith("@loop-conductor/common")) {
+    return "./common_index"
+  }
   const absImport = path.resolve(path.dirname(filePath), importFile);
   const modulePath = flattenFilePath(absImport);
 

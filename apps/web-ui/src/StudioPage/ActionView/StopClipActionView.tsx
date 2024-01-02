@@ -1,4 +1,5 @@
-import { FormElement, Input, Label, StopClipAction } from "../../Shared";
+import { StopClipAction } from "@loop-conductor/common";
+import { FormElement, Input, Label } from "../../Shared";
 
 interface Props {
   action: StopClipAction;

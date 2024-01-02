@@ -1,58 +1,66 @@
-import { useCallback, useMemo } from "react";
 import {
   Action,
   ArmTrackAction,
   FireClipAction,
   FireSceneAction,
-  MenuButton,
-  MenuItem,
+  MemoAction,
   MetronomeAction,
   OverdubLoopAction,
   RecordLoopAction,
   StopClipAction,
   TempoAction,
-  getUUID,
-} from "../../Shared";
+  WaitAction,
+} from "@loop-conductor/common";
+import { useCallback, useMemo } from "react";
+import { MenuButton, MenuItem, getUUID } from "../../Shared";
 
 interface Props {
   onAddAction: (action: Action) => void;
+  startBar: number;
 }
 
-function createDefaultAction(type: Action["type"]): Action {
+function createDefaultAction(type: Action["type"], startBar: number): Action {
   const map: Record<Action["type"], Action> = {
+    wait: {
+      id: getUUID(),
+      barCount: 4,
+      type: "wait",
+      startBar,
+    } satisfies WaitAction,
     armTrack: {
       id: getUUID(),
       trackName: 0,
       type: "armTrack",
       armed: 1,
-      at: 0,
+      startBar,
     } satisfies ArmTrackAction,
     fireClip: {
       id: getUUID(),
       trackName: 0,
       sceneName: 0,
       type: "fireClip",
-      at: 0,
+      startBar,
     } satisfies FireClipAction,
     fireScene: {
       id: getUUID(),
       sceneName: 0,
       type: "fireScene",
-      at: 0,
+      startBar,
     } satisfies FireSceneAction,
     metronome: {
       id: getUUID(),
       type: "metronome",
       enable: 1,
-      at: 0,
+      startBar,
     } satisfies MetronomeAction,
     overdubLoop: {
       id: getUUID(),
       trackName: 0,
       type: "overdubLoop",
+      unarmOnStop: 0,
       barCount: 1,
       sceneName: 0,
-      at: 0,
+      startBar,
     } satisfies OverdubLoopAction,
     recordLoop: {
       id: getUUID(),
@@ -60,30 +68,38 @@ function createDefaultAction(type: Action["type"]): Action {
       type: "recordLoop",
       barCount: 1,
       sceneName: 0,
-      at: 0,
+      unarmOnStop: 0,
+      unarmOthersOnStart: 0,
+      startBar,
     } satisfies RecordLoopAction,
     stopClip: {
       id: getUUID(),
       trackName: 0,
       sceneName: 0,
       type: "stopClip",
-      at: 0,
+      startBar,
     } satisfies StopClipAction,
     tempo: {
       id: getUUID(),
       type: "tempo",
-      at: 0,
+      startBar,
       tempo: 120,
     } satisfies TempoAction,
+    memo: {
+      id: getUUID(),
+      type: "memo",
+      startBar,
+      memo: "",
+    } satisfies MemoAction,
   };
 
   return map[type];
 }
 
-export function AddActionMenu({ onAddAction }: Props) {
+export function AddActionMenu({ onAddAction, startBar }: Props) {
   const onAdd = useCallback(
     (type: Action["type"]) => {
-      const action = createDefaultAction(type);
+      const action = createDefaultAction(type, startBar);
       onAddAction(action);
       if (document.activeElement instanceof HTMLElement)
         document.activeElement?.blur();
@@ -124,6 +140,14 @@ export function AddActionMenu({ onAddAction }: Props) {
       {
         label: "Tempo",
         onClick: () => onAdd("tempo"),
+      },
+      {
+        label: "Wait",
+        onClick: () => onAdd("wait"),
+      },
+      {
+        label: "Memo",
+        onClick: () => onAdd("memo"),
       },
     ];
   }, [onAdd]);

@@ -1,10 +1,5 @@
-import {
-  Checkbox,
-  FormElement,
-  Input,
-  Label,
-  RecordLoopAction,
-} from "../../Shared";
+import { RecordLoopAction } from "@loop-conductor/common";
+import { Checkbox, FormElement, Input, Label } from "../../Shared";
 
 interface Props {
   action: RecordLoopAction;

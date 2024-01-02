@@ -1,21 +1,17 @@
-import { ClipManager } from "./Lib/ClipManager";
-import { ConductorManager } from "./Lib/ConductorManager";
+import { ConductorModel } from "./Lib/ConductorModel";
 
+import { IdGenerator, isValidationError } from "@loop-conductor/common";
 import {
-  getClipManager,
   getConductorManager,
   getLive,
-  getMaxObjectManager,
   getPadsManager,
   getTaskManager,
   setGlobal,
 } from "./Lib/Globals";
 import { Live } from "./Lib/Live";
 import { logError, logInfo } from "./Lib/Log";
-import { MaxObjectManager } from "./Lib/MaxObjectManager";
 import { PadsManager } from "./Lib/PadsManager";
 import { TaskManager } from "./Lib/TaskManager";
-import { IdGenerator, isValidationError } from "./Lib/Utils";
 
 enum Outlets {
   conductor = 0,
@@ -30,10 +26,8 @@ function init() {
   logInfo("Initializing");
   setGlobal("idGenerator", new IdGenerator());
   setGlobal("live", new Live());
-  setGlobal("taskManager", new TaskManager());
+  setGlobal("taskManager", new TaskManager(patcher));
   setGlobal("padsManager", new PadsManager());
-  setGlobal("maxObjectManager", new MaxObjectManager(patcher));
-  setGlobal("clipManager", new ClipManager());
   outlet(Outlets.readyBang, "bang");
 
   getPadsManager().observe((config) => {
@@ -43,8 +37,7 @@ function init() {
 
 function reset(): void {
   logInfo("Resetting");
-  getMaxObjectManager().reset();
-  getClipManager().reset();
+  getConductorManager()?.deleteManagedClips();
   getTaskManager().reset();
 
   getLive().unarmAllTracks();
@@ -52,17 +45,16 @@ function reset(): void {
 
 function loadFromString(json: string): void {
   const padsManager = getPadsManager();
-  let conductorManager: ConductorManager | null = null;
+  let conductorManager: ConductorModel | null = null;
 
   try {
     logInfo("Loading conductor from string");
-    conductorManager = ConductorManager.parse(json);
+    conductorManager = ConductorModel.parse(json);
   } catch (conductorOrError) {
     setGlobal("conductorManager", null);
 
     // Make sure to reset the task manager after the conductor has been set to null
     // so it will trigger an event with the right conductor value
-    getMaxObjectManager().reset();
     getTaskManager().reset();
 
     if (isValidationError(conductorOrError)) {
@@ -85,7 +77,6 @@ function loadFromString(json: string): void {
   setGlobal("conductorManager", conductorManager);
   // Make sure to reset the task manager after the conductor has been set to null
   // so it will trigger an event with the right conductor value
-  getMaxObjectManager().reset();
   getTaskManager().reset();
 
   if (conductorManager) {

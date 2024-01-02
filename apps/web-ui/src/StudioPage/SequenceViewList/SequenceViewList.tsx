@@ -1,8 +1,8 @@
+import { Sequence } from "@loop-conductor/common";
 import { produce } from "immer";
 import { useCallback } from "react";
 import {
   Button,
-  Sequence,
   getUUID,
   useAvailablePadIds,
   useConductorContext,

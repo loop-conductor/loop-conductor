@@ -1,4 +1,5 @@
-import { Checkbox, FormElement, Label, MetronomeAction } from "../../Shared";
+import { MetronomeAction } from "@loop-conductor/common";
+import { Checkbox, FormElement, Label } from "../../Shared";
 
 interface Props {
   action: MetronomeAction;

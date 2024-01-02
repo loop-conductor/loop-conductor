@@ -4,9 +4,15 @@
 
 export const PadCount = 12;
 
-// Internally tracks are 0 Based, but for sake of clarity,
-// they are defined in the Json as 1 based.
+/**
+ * A track name.
+ * May be either a 1-indexed number or a string representing the name of the track.
+ */
 export type TrackName = string | number;
+/**
+ * A scene name.
+ * May be either a 1-indexed number or a string representing the name of the track.
+ */
 export type SceneName = string | number;
 
 export interface ValidationError {
@@ -94,9 +100,19 @@ export interface TimeSignature {
 
 export interface Task {
   id: number;
+  /**
+   * A precise timepoint when the task should be executed.
+   */
   timepoint: Time;
+  /**
+   * A callback to execute when the task is executed.
+   */
   callback: TaskCallback;
-  sequenceId: number;
+  /**
+   * The sequence id of the sequence that created the task.
+   * Mainly used to identify which "pad" should be lit when the task is executed.
+   */
+  sequenceId: string;
 }
 
 export type TaskCallback = () => void;
@@ -110,12 +126,9 @@ export interface BaseAction<Name extends string = string> {
   id: string;
   type: Name;
   /**
-   * When this action will be triggered.
-   * In Bars count relative to the sequence start time
-   * If not provided, it will be adjusted to match the end of the previous action.
-   * ( see resolveRelativeTimes )
+   * The start bar, relative to the start of the sequence.
    */
-  at?: number;
+  startBar: number;
 }
 
 export interface RecordLoopAction extends BaseAction<"recordLoop"> {
@@ -123,15 +136,15 @@ export interface RecordLoopAction extends BaseAction<"recordLoop"> {
   trackName: TrackName;
   sceneName: SceneName;
   // Wether the track should be un armed when the loop is done recording
-  unarmOnStop?: 0 | 1;
+  unarmOnStop: 0 | 1;
   // Wether ALL Others tracks should be un armed when the loop start recording
-  unarmOthersOnStart?: 0 | 1;
+  unarmOthersOnStart: 0 | 1;
 }
 
 export interface ArmTrackAction extends BaseAction<"armTrack"> {
   trackName: TrackName;
   // Default to true
-  armed?: 0 | 1;
+  armed: 0 | 1;
 }
 
 export interface FireClipAction extends BaseAction<"fireClip"> {
@@ -152,12 +165,20 @@ export interface OverdubLoopAction extends BaseAction<"overdubLoop"> {
   trackName: TrackName;
   sceneName: SceneName;
   // Wether the track should be un armed when the loop is done recording
-  unarmOnStop?: 0 | 1;
+  unarmOnStop: 0 | 1;
 }
 
 export interface StopClipAction extends BaseAction<"stopClip"> {
   sceneName: SceneName;
   trackName: TrackName;
+}
+
+export interface WaitAction extends BaseAction<"wait"> {
+  barCount: number;
+}
+
+export interface MemoAction extends BaseAction<"memo"> {
+  memo: string;
 }
 
 export interface TempoAction extends BaseAction<"tempo"> {
@@ -172,9 +193,22 @@ export type Action =
   | OverdubLoopAction
   | RecordLoopAction
   | StopClipAction
-  | RecordLoopAction
-  | StopClipAction
-  | TempoAction;
+  | TempoAction
+  | MemoAction
+  | WaitAction;
+
+export type ActionMap = {
+  armTrack: ArmTrackAction;
+  fireClip: FireClipAction;
+  stopClip: StopClipAction;
+  overdubLoop: OverdubLoopAction;
+  tempo: TempoAction;
+  recordLoop: RecordLoopAction;
+  metronome: MetronomeAction;
+  fireScene: FireSceneAction;
+  wait: WaitAction;
+  memo: MemoAction;
+};
 
 export interface Sequence {
   // A unique id to identify the sequence

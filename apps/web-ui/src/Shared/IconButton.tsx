@@ -6,6 +6,7 @@ export interface IconButtonProps extends HTMLAttributes<HTMLButtonElement> {
   iconName: string;
   size?: "lg" | "md" | "sm";
   disabled?: boolean;
+  destructive?: boolean;
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
@@ -16,6 +17,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       size = "md",
       disabled,
       className,
+      destructive,
       ...props
     }: IconButtonProps,
     ref
@@ -37,8 +39,11 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         className={classNames(
           sizeMap[size],
           "flex items-center justify-center  border border-cyan-900",
-          "p-1 text-cyan-900 duration-75 transition-colors bg-cyan-600 rounded-lg hover:bg-cyan-500 active:bg-cyan-400",
+          "p-1  duration-75 transition-colors bg-cyan-600 rounded-lg",
           disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer",
+          destructive
+            ? "hover:text-orange-100 hover:bg-orange-600 active:bg-orange-400 text-orange-900"
+            : "hover:bg-cyan-500 active:bg-cyan-400 text-cyan-900",
           className
         )}
       >

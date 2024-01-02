@@ -1,23 +1,22 @@
 {
-  "name": "live-plugin",
+  "name": "common",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/live-plugin/src",
-  "projectType": "application",
+  "sourceRoot": "libs/common/src",
+  "projectType": "library",
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["tsc", "node ./postProcessDist.js"],
-        "cwd": "apps/live-plugin",
+        "commands": ["tsc"],
+        "cwd": "libs/common",
         "parallel": false
-      },
-      "outputs": ["{workspaceRoot}/.dist"]
+      }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "commands": ["tsc", "jest"],
-        "cwd": "apps/live-plugin",
+        "cwd": "libs/common",
         "parallel": false
       }
     },
@@ -25,7 +24,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": ["prettier . -w"],
-        "cwd": "apps/live-plugin",
+        "cwd": "libs/common",
         "parallel": false
       }
     }

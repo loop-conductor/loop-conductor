@@ -1,10 +1,5 @@
-import {
-  ArmTrackAction,
-  Checkbox,
-  FormElement,
-  Input,
-  Label,
-} from "../../Shared";
+import { ArmTrackAction } from "@loop-conductor/common";
+import { Checkbox, FormElement, Input, Label } from "../../Shared";
 
 interface Props {
   action: ArmTrackAction;

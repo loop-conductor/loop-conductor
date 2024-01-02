@@ -1,4 +1,4 @@
-import { PadCount, Path, SceneName, TrackName, ValidationError } from "./Types";
+import { PadCount, Path, ValidationError } from "./Types";
 
 /**
  * Generic utils
@@ -81,19 +81,4 @@ export class IdGenerator {
     this.nextId = this.nextId + 1;
     return id;
   }
-}
-
-/**
- * Scene name and track names are expressed in the JSON as 1-based indexes.
- * Internally eveything is 0-based, so we need to convert.
- * @param name
- * @returns
- */
-export function patchSceneOrTrackName<T extends TrackName | SceneName>(
-  name: T
-): T {
-  if (typeof name === "number") {
-    return (name - 1) as T;
-  }
-  return name;
 }
