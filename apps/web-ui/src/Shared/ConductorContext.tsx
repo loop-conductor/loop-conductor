@@ -1,13 +1,13 @@
+import { Conductor } from "@loop-conductor/common";
 import { createContext, useContext } from "react";
-import { Conductor } from ".";
 
-const conductorContext = createContext<Conductor | null>(null);
+const conductorContext = createContext<Conductor | undefined>(undefined);
 
 export function ConductorProvider({
   conductor,
   children,
 }: {
-  conductor: Conductor;
+  conductor: Conductor | undefined;
   children: React.ReactNode;
 }) {
   return (
@@ -17,12 +17,7 @@ export function ConductorProvider({
   );
 }
 
-export function useConductorContext(): Conductor {
+export function useConductor(): Conductor | undefined {
   const conductor = useContext(conductorContext);
-  if (conductor === null) {
-    throw new Error(
-      "useConductorContext must be used within a ConductorProvider"
-    );
-  }
   return conductor;
 }

@@ -3,13 +3,16 @@ import { ConductorModel } from "./Lib/ConductorModel";
 import { IdGenerator, isValidationError } from "@loop-conductor/common";
 import {
   getConductorManager,
+  getGlobal,
   getLive,
+  getMidiManager,
   getPadsManager,
   getTaskManager,
   setGlobal,
 } from "./Lib/Globals";
 import { Live } from "./Lib/Live";
 import { logError, logInfo } from "./Lib/Log";
+import { MidiManager } from "./Lib/MidiManager";
 import { PadsManager } from "./Lib/PadsManager";
 import { TaskManager } from "./Lib/TaskManager";
 
@@ -28,10 +31,51 @@ function init() {
   setGlobal("live", new Live());
   setGlobal("taskManager", new TaskManager(patcher));
   setGlobal("padsManager", new PadsManager());
+  setGlobal("midiManager", new MidiManager());
   outlet(Outlets.readyBang, "bang");
 
   getPadsManager().observe((config) => {
     outlet(Outlets.padConfig, JSON.stringify(config));
+  });
+
+  getMidiManager().observe(({ conductor }) => {
+    let conductorModel: ConductorModel | null = null;
+
+    try {
+      conductorModel = new ConductorModel(conductor);
+    } catch (conductorOrError) {
+      setGlobal("conductorManager", null);
+
+      // Make sure to reset the task manager after the conductor has been set to null
+      // so it will trigger an event with the right conductor value
+      getTaskManager().reset();
+
+      if (isValidationError(conductorOrError)) {
+        logError(
+          "Failed to load conductor",
+          conductorOrError.path,
+          conductorOrError.err
+        );
+        outlet(
+          Outlets.errors,
+          JSON.stringify({
+            error: conductorOrError.err,
+            path: conductorOrError.path.join("."),
+          })
+        );
+        return;
+      }
+    }
+
+    setGlobal("conductorManager", conductorModel);
+    // Make sure to reset the task manager after the conductor has been set to null
+    // so it will trigger an event with the right conductor value
+    getTaskManager().reset();
+
+    if (conductorModel) {
+      logInfo("Conductor loaded");
+      outlet(Outlets.conductor, JSON.stringify(conductor));
+    }
   });
 }
 
@@ -43,13 +87,19 @@ function reset(): void {
   getLive().unarmAllTracks();
 }
 
-function loadFromString(json: string): void {
-  const padsManager = getPadsManager();
-  let conductorManager: ConductorModel | null = null;
+/**
+ * Max plugin entry point.
+ *
+ * Load a con
+ * @param json
+ * @returns
+ */
+function loadConductorFromString(json: string): void {
+  let conductorModel: ConductorModel | null = null;
 
   try {
     logInfo("Loading conductor from string");
-    conductorManager = ConductorModel.parse(json);
+    conductorModel = ConductorModel.parse(json);
   } catch (conductorOrError) {
     setGlobal("conductorManager", null);
 
@@ -74,12 +124,12 @@ function loadFromString(json: string): void {
     }
   }
 
-  setGlobal("conductorManager", conductorManager);
+  setGlobal("conductorManager", conductorModel);
   // Make sure to reset the task manager after the conductor has been set to null
   // so it will trigger an event with the right conductor value
   getTaskManager().reset();
 
-  if (conductorManager) {
+  if (conductorModel) {
     logInfo("Conductor loaded");
     outlet(Outlets.conductor, json);
   }
@@ -99,4 +149,9 @@ function triggerSequenceByPadId(padId: number): void {
     return;
   }
   conductorManager.triggerSequenceByPadId(padId);
+}
+
+function onSysexByteReceived(byte: number): void {
+  const midiManager = getGlobal("midiManager");
+  midiManager.onSysexByteReceived(byte);
 }

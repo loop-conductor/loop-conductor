@@ -12,7 +12,7 @@ import {
 } from "@floating-ui/react";
 import { useCallback, useState } from "react";
 import { Button } from "./Button";
-import { useConductorContext } from "./ConductorContext";
+import { useConductor } from "./ConductorContext";
 import { IconButtonProps } from "./IconButton";
 import { useAvailablePadIds } from "./useAvailablePadIds";
 
@@ -28,9 +28,8 @@ const GridY = [0, 1, 2];
 export function PadPicker({ value, onChange, ...props }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const availablePadIds = useAvailablePadIds(useConductorContext());
+  const availablePadIds = useAvailablePadIds(useConductor());
 
-  console.log("availablePadIds", availablePadIds);
   const { refs, floatingStyles, context } = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,

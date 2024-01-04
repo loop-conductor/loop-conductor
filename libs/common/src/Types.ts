@@ -226,3 +226,14 @@ export interface Conductor {
   name: string;
   sequences: Sequence[];
 }
+
+/**
+ * Midi command
+ */
+
+export interface LoadConductorMidiCommand {
+  type: "loadConductor";
+  conductor: Conductor;
+}
+
+export type MidiCommand = LoadConductorMidiCommand;

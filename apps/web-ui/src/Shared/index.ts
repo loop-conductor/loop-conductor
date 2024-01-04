@@ -8,5 +8,6 @@ export * from "./Input";
 export * from "./Label";
 export * from "./MenuButton";
 export * from "./TextArea";
+export * from "./Types";
 export * from "./Utils";
 export * from "./useAvailablePadIds";

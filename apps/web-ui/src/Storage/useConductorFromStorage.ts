@@ -1,9 +1,9 @@
+import { Conductor } from "@loop-conductor/common";
 import { produce } from "immer";
 import { useCallback, useMemo } from "react";
-import { Conductor } from "../Shared";
 import { Storage } from "./Types";
 
-export function useLoadedConductorState(
+export function useConductorFromStorage(
   storage: Storage,
   setStorage: (storage: Storage) => void
 ): [Conductor | undefined, (conductor: Conductor) => void] {

@@ -7,25 +7,14 @@ import {
   isArray,
   isValidPadId,
 } from "@loop-conductor/common";
-import { managedClipLocators, taskCreators, validators } from "./ActionImpl";
+import {
+  managedClipLocators,
+  taskCreators,
+  validators,
+} from "./ActionImpl/index";
 import { getLive, getTaskManager } from "./Globals";
 import { logError } from "./Log";
-/**
- * 
- 
-public resolveRelativeTimes(lastTicks: number): number {
-    const tSig = getLive().getCurrentTimeSignature();
-    if (this.action.at === undefined) {
-      this.action.at = ticksToTime(lastTicks, tSig).bar - 1;
-    }
-    return (
-      barsToTicks(this.action.at, tSig) + getActionDuration(this.action, tSig)
-    );
-  }
 
-
- * 
- */
 export class ConductorModel {
   public readonly conductor: Conductor | null = null;
 

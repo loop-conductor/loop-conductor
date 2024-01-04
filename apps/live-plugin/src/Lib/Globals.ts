@@ -1,6 +1,7 @@
 import { IdGenerator } from "@loop-conductor/common";
 import { ConductorModel } from "./ConductorModel";
 import { Live } from "./Live";
+import { MidiManager } from "./MidiManager";
 import { PadsManager } from "./PadsManager";
 import { TaskManager } from "./TaskManager";
 
@@ -12,6 +13,7 @@ interface GlobalAttributes {
   live: Live;
   taskManager: TaskManager;
   padsManager: PadsManager;
+  midiManager: MidiManager;
   conductorManager: ConductorModel | null;
 }
 
@@ -50,6 +52,10 @@ export function getLive(): Live {
 
 export function getTaskManager(): TaskManager {
   return getGlobal("taskManager");
+}
+
+export function getMidiManager(): MidiManager {
+  return getGlobal("midiManager");
 }
 
 export function getPadsManager(): PadsManager {

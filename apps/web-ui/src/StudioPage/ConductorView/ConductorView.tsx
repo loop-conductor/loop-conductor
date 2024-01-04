@@ -1,6 +1,6 @@
+import { Conductor, Sequence } from "@loop-conductor/common";
 import { produce } from "immer";
 import { useCallback } from "react";
-import { Conductor, ConductorProvider, Sequence } from "../../Shared";
 import { SequenceViewList } from "../SequenceViewList";
 
 interface Props {
@@ -19,12 +19,11 @@ export function ConductorView({ conductor, onConductorChange }: Props) {
     },
     [conductor, onConductorChange]
   );
+
   return (
-    <ConductorProvider conductor={conductor}>
-      <SequenceViewList
-        sequences={conductor.sequences}
-        onSequenceListChange={handleOnSequenceListChange}
-      />
-    </ConductorProvider>
+    <SequenceViewList
+      sequences={conductor.sequences}
+      onSequenceListChange={handleOnSequenceListChange}
+    />
   );
 }

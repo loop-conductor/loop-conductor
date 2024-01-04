@@ -23,7 +23,7 @@ type Validators = {
 
 export const validators: Validators = {
   armTrack: (action: ArmTrackAction, path: Path) => {
-    if (!getLive().isValidTrack(action.trackName)) {
+    if (!getLive().isValidTrackName(action.trackName)) {
       throw createValidationError(`Invalid track name (${action.trackName})`, [
         ...path,
         "trackName",
@@ -34,7 +34,7 @@ export const validators: Validators = {
     if (!getLive().isValidSceneName(action.sceneName)) {
       throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
     }
-    if (!getLive().isValidTrack(action.trackName)) {
+    if (!getLive().isValidTrackName(action.trackName)) {
       throw createValidationError(`Invalid track name`, [...path, "trackName"]);
     }
   },
@@ -42,7 +42,7 @@ export const validators: Validators = {
     if (!getLive().isValidSceneName(action.sceneName)) {
       throw createValidationError("Invalid scene name", [...path, "sceneName"]);
     }
-    if (!getLive().isValidTrack(action.trackName)) {
+    if (!getLive().isValidTrackName(action.trackName)) {
       throw createValidationError("Invalid track name", [...path, "trackName"]);
     }
   },
@@ -50,7 +50,7 @@ export const validators: Validators = {
     if (!getLive().isValidSceneName(action.sceneName)) {
       throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
     }
-    if (!getLive().isValidTrack(action.trackName)) {
+    if (!getLive().isValidTrackName(action.trackName)) {
       throw createValidationError(`Invalid track name`, [...path, "trackName"]);
     }
   },
@@ -63,7 +63,7 @@ export const validators: Validators = {
     if (!getLive().isValidSceneName(action.sceneName)) {
       throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
     }
-    if (!getLive().isValidTrack(action.trackName)) {
+    if (!getLive().isValidTrackName(action.trackName)) {
       throw createValidationError(`Invalid track name`, [...path, "trackName"]);
     }
     if (!isValidBarCount(action.barCount)) {

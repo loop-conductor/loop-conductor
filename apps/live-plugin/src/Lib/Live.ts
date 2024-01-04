@@ -4,6 +4,7 @@ import {
   TimeSignature,
   TrackName,
 } from "@loop-conductor/common";
+import { logInfo } from "./Log";
 
 export class LiveClip {
   private api: LiveAPI;
@@ -138,11 +139,13 @@ export class Live {
 
   public getTrack(nameOrIndex: TrackName): LiveTrack {
     const trackIndex = this.getTrackIndex(nameOrIndex);
+    logInfo("trackIndex: " + trackIndex, nameOrIndex);
     var trackPath = "live_set tracks " + trackIndex;
     return new LiveTrack(trackPath, this);
   }
 
-  public isValidTrack(nameOrIndex: TrackName): boolean {
+  public isValidTrackName(nameOrIndex: TrackName): boolean {
+    logInfo("isValidTrack: " + nameOrIndex);
     return this.getTrackIndex(nameOrIndex) >= 0;
   }
 
@@ -153,7 +156,7 @@ export class Live {
   }
 
   public isValidSceneName(nameOrIndex: SceneName): boolean {
-    return this.getSceneIndex(nameOrIndex) > 0;
+    return this.getSceneIndex(nameOrIndex) >= 0;
   }
 
   public getTrackCount(): number {
@@ -177,13 +180,11 @@ export class Live {
       return -1;
     }
 
-    for (var i = 1; i <= numTracks; i++) {
-      const track = this.getTrack(i);
-      // Get the name of the track
-      var trackName = track.getName();
-
-      if (trackName == name) {
-        return i - 1;
+    logInfo("getTrackIndex", name);
+    for (var i = 0; i < numTracks; i++) {
+      const track = this.getTrackByIndex(i);
+      if (track.getName() == name) {
+        return i;
       }
     }
     return -1;
@@ -206,11 +207,11 @@ export class Live {
       return -1;
     }
 
-    for (var i = 1; i <= numScenes; i++) {
-      const scene = this.getScene(i);
+    for (var i = 0; i < numScenes; i++) {
+      const scene = this.getSceneByIndex(i);
       // Get the name of the track
       if (scene.getName() == sceneName) {
-        return i - 1;
+        return i;
       }
     }
     return -1;
@@ -221,5 +222,15 @@ export class Live {
     for (var i = 0; i < numTracks; i++) {
       this.getTrack(i).arm(0);
     }
+  }
+
+  private getTrackByIndex(trackIndex: number): LiveTrack {
+    var trackPath = "live_set tracks " + trackIndex;
+    return new LiveTrack(trackPath, this);
+  }
+
+  public getSceneByIndex(sceneIndex: number): LiveScene {
+    var scenePath = "live_set scenes " + sceneIndex;
+    return new LiveScene(scenePath);
   }
 }

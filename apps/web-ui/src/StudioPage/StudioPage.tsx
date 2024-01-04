@@ -1,17 +1,27 @@
+import { Conductor } from "@loop-conductor/common";
 import { produce } from "immer";
 import { useCallback, useState } from "react";
-import { Conductor, getUUID } from "../Shared";
-import { useLoadedConductorState, useStorageState } from "../Storage";
+import { useMidiInit, useSyncConductor } from "../Midi";
+import { ConductorProvider, getUUID } from "../Shared";
+import {
+  useConductorFromStorage,
+  useStorage,
+  useSyncStorage,
+} from "../Storage";
 import { ConductorView } from "./ConductorView";
 import { NavBar } from "./NavBar";
 import { Sidebar } from "./Sidebar";
 
 export function StudioPage() {
-  const [storage, setStorage] = useStorageState();
-  const [conductor, setConductor] = useLoadedConductorState(
+  const isMidiReady = useMidiInit();
+  const [storage, setStorage] = useStorage();
+  const [conductor, setConductor] = useConductorFromStorage(
     storage,
     setStorage
   );
+
+  useSyncStorage(storage);
+  useSyncConductor({ conductor, midiOutputName: storage.midiOutputName });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
@@ -58,6 +68,7 @@ export function StudioPage() {
       })
     );
   }, [storage, setStorage]);
+
   const handleDeleteConductor = useCallback(
     (id: string) => {
       setStorage(
@@ -69,33 +80,52 @@ export function StudioPage() {
     },
     [storage, setStorage]
   );
+  const handleMidiOutputChange = useCallback(
+    (outputName: string) => {
+      setStorage(
+        produce(storage, (draft) => {
+          draft.midiOutputName = outputName;
+          return draft;
+        })
+      );
 
+      setIsSidebarOpen(false);
+    },
+    [storage, setStorage]
+  );
+
+  if (!isMidiReady) {
+    return null;
+  }
   return (
-    <div className="bg-zinc-700 flex flex-col h-screen">
-      <NavBar
-        onSidebarOpen={setIsSidebarOpen}
-        isSidebarOpen={isSidebarOpen}
-        conductorName={conductor?.name}
-      />
-      <div className="relative min-h-0 flex-grow">
-        <Sidebar
-          open={isSidebarOpen || !conductor}
-          storage={storage}
+    <ConductorProvider conductor={conductor}>
+      <div className="bg-zinc-700 flex flex-col h-screen">
+        <NavBar
           onSidebarOpen={setIsSidebarOpen}
-          onLoadConductor={handleLoadConductor}
-          onRenameConductor={handleRenameConductor}
-          onCreateConductor={handleCreateConductor}
-          onDeleteConductor={handleDeleteConductor}
+          isSidebarOpen={isSidebarOpen}
+          conductorName={conductor?.name}
         />
-        {conductor && (
-          <ConductorView
-            conductor={conductor}
-            onConductorChange={handleConductorChange}
+        <div className="relative min-h-0 flex-grow">
+          <Sidebar
+            open={isSidebarOpen || !conductor}
+            storage={storage}
+            onSidebarOpen={setIsSidebarOpen}
+            onLoadConductor={handleLoadConductor}
+            onRenameConductor={handleRenameConductor}
+            onCreateConductor={handleCreateConductor}
+            onDeleteConductor={handleDeleteConductor}
+            onMidiOutputChange={handleMidiOutputChange}
           />
-        )}
-        {!conductor && <div />}
+          {conductor && (
+            <ConductorView
+              conductor={conductor}
+              onConductorChange={handleConductorChange}
+            />
+          )}
+          {!conductor && <div />}
+        </div>
       </div>
-    </div>
+    </ConductorProvider>
   );
 }
 

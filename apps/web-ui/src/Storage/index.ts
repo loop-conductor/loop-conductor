@@ -1,3 +1,4 @@
 export * from "./Types";
-export * from "./useLoadedConductorState";
-export * from "./useStorageState";
+export * from "./useConductorFromStorage";
+export * from "./useStorage";
+export * from "./useSyncStorage";

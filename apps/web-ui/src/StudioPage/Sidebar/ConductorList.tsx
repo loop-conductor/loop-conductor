@@ -1,12 +1,13 @@
+import { Conductor } from "@loop-conductor/common";
 import { useCallback } from "react";
-import { Conductor, IconButton, Input, classNames } from "../../Shared";
+import { IconButton, Input, classNames } from "../../Shared";
 
 interface Props {
   conductors: Conductor[];
   onLoadConductor: (id: string) => void;
   onDeleteConductor: (id: string) => void;
   onRenameConductor: (id: string, name: string) => void;
-  loadedConductorId: string | null;
+  loadedConductorId: string | undefined;
 }
 
 export function ConductorList({
@@ -26,7 +27,8 @@ export function ConductorList({
   return (
     <div className="flex flex-col gap-2 overflow-y-auto">
       {conductors.map((conductor) => (
-        <button
+        <div
+          role="button"
           className={classNames(
             "rounded mx-2 px-4 py-2 text-left text-zinc-200 border border-transparent hover:border-cyan-900 ",
             "flex items-center justify-between group",
@@ -54,7 +56,7 @@ export function ConductorList({
               handleDelete(conductor.id);
             }}
           />
-        </button>
+        </div>
       ))}
     </div>
   );

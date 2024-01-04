@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Storage } from "./Types";
-import { useSyncStorage } from "./useSyncStorage";
 
-export function useStorageState(): [Storage, (storage: Storage) => void] {
+export function useStorage(): [Storage, (storage: Storage) => void] {
   const [storage, setStorage] = useState<Storage>(() => {
     const storageAsString = localStorage.getItem("storage");
     if (storageAsString) {
@@ -10,11 +9,10 @@ export function useStorageState(): [Storage, (storage: Storage) => void] {
     }
     return {
       conductors: [],
-      loadedConductorId: null,
+      loadedConductorId: undefined,
+      midiOutputName: undefined,
     } satisfies Storage;
   });
-
-  useSyncStorage(storage);
 
   return [storage, setStorage];
 }

@@ -5,7 +5,7 @@ import {
   Button,
   getUUID,
   useAvailablePadIds,
-  useConductorContext,
+  useConductor,
 } from "../../Shared";
 import { SequenceView } from "../SequenceView";
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function SequenceViewList({ sequences, onSequenceListChange }: Props) {
-  const availablePadIds = useAvailablePadIds(useConductorContext());
+  const availablePadIds = useAvailablePadIds(useConductor());
   const handleOnSequenceChange = useCallback(
     (sequence: Sequence) => {
       onSequenceListChange(

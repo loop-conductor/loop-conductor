@@ -1,4 +1,6 @@
-import { IconButton, classNames } from "../../Shared";
+import { useMemo } from "react";
+import { useMidiToolkit } from "../../Midi";
+import { IconButton, MenuButton, MenuItem, classNames } from "../../Shared";
 import { Storage } from "../../Storage";
 import { ConductorList } from "./ConductorList";
 
@@ -10,6 +12,7 @@ interface Props {
   onRenameConductor: (id: string, name: string) => void;
   onCreateConductor: () => void;
   onDeleteConductor: (id: string) => void;
+  onMidiOutputChange: (outputName: string) => void;
 }
 
 export function Sidebar({
@@ -20,7 +23,18 @@ export function Sidebar({
   onDeleteConductor,
   onRenameConductor,
   onLoadConductor,
+  onMidiOutputChange,
 }: Props) {
+  const { listOutputNames } = useMidiToolkit();
+  const midiOutputItems = useMemo(() => {
+    return listOutputNames().map((name) => {
+      return {
+        label: name,
+        onClick: () => onMidiOutputChange(name),
+      } satisfies MenuItem;
+    });
+  }, [listOutputNames]);
+
   return (
     <>
       {open && (
@@ -50,9 +64,18 @@ export function Sidebar({
           />
         </div>
 
-        <div className="flex justify-end gap-2 p-2">
-          <IconButton iconName="download" />
-          <IconButton iconName="upload" />
+        <div className="flex flex-col justify-between gap-2 p-2">
+          <div className="flex gap-2 justify-end">
+            <IconButton iconName="download" />
+            <IconButton iconName="upload" />
+          </div>
+          <div className="flex gap-2 justify-between text-zinc-200 text-sm">
+            <div className="flex gap-1">
+              <span>Midi output: </span>
+              <span>{storage.midiOutputName}</span>
+            </div>
+            <MenuButton iconName="search" items={midiOutputItems} />
+          </div>
         </div>
       </div>
     </>

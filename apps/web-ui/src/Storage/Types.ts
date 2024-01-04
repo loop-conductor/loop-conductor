@@ -1,6 +1,8 @@
 import { Conductor } from "@loop-conductor/common";
 
 export interface Storage {
-  loadedConductorId: string | null;
+  loadedConductorId: string | undefined;
   conductors: Conductor[];
+
+  midiOutputName: string | undefined;
 }

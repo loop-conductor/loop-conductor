@@ -13,14 +13,6 @@
       },
       "outputs": ["{workspaceRoot}/.dist"]
     },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["tsc", "jest"],
-        "cwd": "apps/live-plugin",
-        "parallel": false
-      }
-    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

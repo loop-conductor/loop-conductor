@@ -1,10 +1,10 @@
+import { Conductor } from "@loop-conductor/common";
 import { useMemo } from "react";
-import { Conductor } from "./Types";
 
-export function useAvailablePadIds(conductor: Conductor): number[] {
+export function useAvailablePadIds(conductor?: Conductor): number[] {
   const usedPadId = useMemo(() => {
     const usedPadId: Set<number> = new Set();
-    conductor.sequences.forEach((sequence) => {
+    conductor?.sequences.forEach((sequence) => {
       usedPadId.add(sequence.padId);
     });
 

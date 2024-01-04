@@ -6,8 +6,8 @@ import {
   roundToNextBar,
   ticksToTime,
   timeToTicks,
-} from "../Lib/Time";
-import { InvalidTime, TimeSignature } from "../Lib/Types";
+} from "./Time";
+import { InvalidTime, TimeSignature } from "./Types";
 
 const tSig: TimeSignature = {
   beatsPerBar: 4,

@@ -12,11 +12,7 @@ import {
 } from "@floating-ui/react";
 import { useCallback, useState } from "react";
 import { IconButton, IconButtonProps } from "./IconButton";
-
-export interface MenuItem {
-  label: string;
-  onClick?: () => void;
-}
+import { MenuItem } from "./Types";
 
 interface Props extends IconButtonProps {
   items: MenuItem[];
