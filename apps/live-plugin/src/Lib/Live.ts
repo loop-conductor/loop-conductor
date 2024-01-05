@@ -4,7 +4,6 @@ import {
   TimeSignature,
   TrackName,
 } from "@loop-conductor/common";
-import { logInfo } from "./Log";
 
 export class LiveClip {
   private api: LiveAPI;
@@ -139,13 +138,11 @@ export class Live {
 
   public getTrack(nameOrIndex: TrackName): LiveTrack {
     const trackIndex = this.getTrackIndex(nameOrIndex);
-    logInfo("trackIndex: " + trackIndex, nameOrIndex);
     var trackPath = "live_set tracks " + trackIndex;
     return new LiveTrack(trackPath, this);
   }
 
   public isValidTrackName(nameOrIndex: TrackName): boolean {
-    logInfo("isValidTrack: " + nameOrIndex);
     return this.getTrackIndex(nameOrIndex) >= 0;
   }
 
@@ -173,18 +170,22 @@ export class Live {
    */
   public getTrackIndex(name: TrackName): number {
     const numTracks = this.getTrackCount();
-    if (typeof name === "number") {
-      if (name > 0 && name <= numTracks) {
-        return name - 1;
+
+    const nameAsNumber = Number(name);
+
+    if (!isNaN(nameAsNumber)) {
+      if (nameAsNumber > 0 && nameAsNumber <= numTracks) {
+        return nameAsNumber - 1;
       }
       return -1;
     }
 
-    logInfo("getTrackIndex", name);
-    for (var i = 0; i < numTracks; i++) {
-      const track = this.getTrackByIndex(i);
-      if (track.getName() == name) {
-        return i;
+    if (typeof name === "string") {
+      for (var i = 0; i < numTracks; i++) {
+        const track = this.getTrackByIndex(i);
+        if (track.getName() == name) {
+          return i;
+        }
       }
     }
     return -1;

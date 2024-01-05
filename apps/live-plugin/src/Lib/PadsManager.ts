@@ -12,7 +12,6 @@ type Observer = (config: PadsConfig) => void;
 
 export class PadsManager {
   private mapping: Record<number, number> = {};
-  private activePads: Record<number, boolean> = {};
 
   public observe(observer: Observer): () => void {
     return getTaskManager().observe((tasks) => {
@@ -26,11 +25,7 @@ export class PadsManager {
           );
 
           const padId = sequence.padId - 1;
-          const padName = sequence.name ?? `Seq${index}`;
-          config[padId] = this.getPadConfig(
-            padName,
-            isActive ? "active" : "default"
-          );
+          config[padId] = this.getPadConfig(isActive, true);
         });
       }
       observer(config);
@@ -41,7 +36,7 @@ export class PadsManager {
     const config: PadsConfig = {};
 
     for (let i = 0; i < PadCount; i++) {
-      config[i] = this.getPadConfig("-", "disabled");
+      config[i] = this.getPadConfig(false, false);
     }
 
     return config;
@@ -51,7 +46,9 @@ export class PadsManager {
     return this.mapping[padId] ?? -1;
   }
 
-  private getPadConfig(text: string, color: keyof typeof colors): unknown[] {
-    return ["text", text, ",", "activebgcolor", ...colors[color]];
+  private getPadConfig(state: boolean, active: boolean): unknown[] {
+    // This is a content of a max message that will set the pad button
+    // toggle state and active state
+    return ["set", state ? 1 : 0, ",", "active", active ? 1 : 0];
   }
 }

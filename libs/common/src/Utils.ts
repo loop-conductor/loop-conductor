@@ -1,4 +1,4 @@
-import { PadCount, Path, ValidationError } from "./Types";
+import { PadCount, ValidationError } from "./Types";
 
 /**
  * Generic utils
@@ -24,16 +24,6 @@ export const normalizeToArray = <T>(
   return [value] as Exclude<T, undefined>[];
 };
 
-export function createValidationError(
-  err: string,
-  path?: Path
-): ValidationError {
-  return {
-    path: path ?? [],
-    err,
-  };
-}
-
 export function isArray<T>(obj: unknown): obj is T[] {
   return Array.isArray(obj);
 }
@@ -57,7 +47,7 @@ export function arrayFind<T>(
 export function isValidationError(obj: unknown): obj is ValidationError {
   const casted = obj as ValidationError;
   if (obj) {
-    return typeof casted.err === "string";
+    return typeof casted.Error === "string";
   }
   return false;
 }

@@ -2,8 +2,8 @@ import {
   Clip,
   Conductor,
   Task,
+  ValidationError,
   arrayFind,
-  createValidationError,
   isArray,
   isValidPadId,
 } from "@loop-conductor/common";
@@ -12,8 +12,8 @@ import {
   taskCreators,
   validators,
 } from "./ActionImpl/index";
-import { getLive, getTaskManager } from "./Globals";
-import { logError } from "./Log";
+import { getLive, getLogManager, getTaskManager } from "./Globals";
+import { logError } from "./LogManager";
 
 export class ConductorModel {
   public readonly conductor: Conductor | null = null;
@@ -24,7 +24,9 @@ export class ConductorModel {
     try {
       conductor = JSON.parse(obj) as Conductor;
     } catch (err) {
-      throw createValidationError("Failed to parse file");
+      throw {
+        Error: "Failed to parse conductor",
+      } satisfies ValidationError;
     }
 
     return new ConductorModel(conductor);
@@ -32,50 +34,48 @@ export class ConductorModel {
 
   constructor(conductor: Conductor) {
     this.conductor = conductor;
-    if (!conductor) {
-      throw createValidationError("No conductor", []);
-    }
 
     if (!conductor.sequences) {
-      throw createValidationError("No sequences defined", ["sequences"]);
+      throw {
+        Error: "No sequences defined",
+        Conductor: conductor.name,
+      } satisfies ValidationError;
     }
     if (!isArray(conductor.sequences)) {
-      throw createValidationError("Sequences is not an array", ["sequences"]);
+      throw {
+        Error: "Sequence is not an array",
+        Conductor: conductor.name,
+      } satisfies ValidationError;
     }
 
     // Validate each sequence
     this.conductor.sequences.forEach((sequence, sequenceIndex) => {
       if (!sequence.actions) {
-        throw createValidationError("No actions defined in sequence", [
-          "sequences",
-          sequenceIndex,
-          "actions",
-        ]);
+        throw {
+          Error: "No actions defined in sequence",
+          Conductor: conductor.name,
+          Sequence: sequence.name,
+        } satisfies ValidationError;
       }
       if (!isArray(sequence.actions)) {
-        throw createValidationError("Actions is not an array", [
-          "sequences",
-          sequenceIndex,
-          "actions",
-        ]);
+        throw {
+          Error: "Actions is not an array",
+          Conductor: conductor.name,
+          Sequence: sequence.name,
+        } satisfies ValidationError;
       }
       if (!isValidPadId(sequence.padId)) {
-        throw createValidationError("Invalid Pad Id", [
-          "sequences",
-          sequenceIndex,
-          "padId",
-        ]);
+        throw {
+          Error: "Invalid pad id",
+          Conductor: conductor.name,
+          Sequence: sequence.name,
+        } satisfies ValidationError;
       }
 
       sequence.actions.forEach((action, actionIndex) => {
         const validator = validators[action.type];
         if (validator) {
-          validator(action as any, [
-            "sequences",
-            sequenceIndex,
-            "actions",
-            actionIndex,
-          ]);
+          validator(action as any, conductor, sequence, actionIndex);
         }
       });
       if (!this.conductor) {
@@ -87,10 +87,11 @@ export class ConductorModel {
       );
 
       if (dup) {
-        throw createValidationError(
-          `PadId ${sequence.padId} is used multiple times`,
-          ["sequences", sequenceIndex, "padId"]
-        );
+        throw {
+          Error: `PadId ${sequence.padId} is used multiple times`,
+          Conductor: conductor.name,
+          Sequence: sequence.name,
+        } satisfies ValidationError;
       }
 
       // TODO: Validate each clip
@@ -134,6 +135,9 @@ export class ConductorModel {
         }
       });
 
+      getLogManager().logInfo({
+        Action: `Starting sequence: ${sequence.name}`,
+      });
       // Schelude the tasks
       getTaskManager().scheduleTask(tasks);
     } else {

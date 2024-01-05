@@ -2,98 +2,220 @@ import {
   Action,
   ActionMap,
   ArmTrackAction,
+  Conductor,
   FireClipAction,
   FireSceneAction,
   MemoAction,
   MetronomeAction,
   OverdubLoopAction,
-  Path,
   RecordLoopAction,
+  Sequence,
   StopClipAction,
   TempoAction,
+  ValidationError,
   WaitAction,
-  createValidationError,
   isValidBarCount,
 } from "@loop-conductor/common";
 import { getLive } from "../Globals";
 
 type Validators = {
-  [key in Action["type"]]: (action: ActionMap[key], path: Path) => void;
+  [key in Action["type"]]: (
+    action: ActionMap[key],
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => void;
 };
 
 export const validators: Validators = {
-  armTrack: (action: ArmTrackAction, path: Path) => {
+  armTrack: (
+    action: ArmTrackAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidTrackName(action.trackName)) {
-      throw createValidationError(`Invalid track name (${action.trackName})`, [
-        ...path,
-        "trackName",
-      ]);
+      throw {
+        Error: `Invalid track name: ${action.trackName}`,
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  fireClip: (action: FireClipAction, path: Path) => {
+  fireClip: (
+    action: FireClipAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidSceneName(action.sceneName)) {
-      throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
+      throw {
+        Error: "Invalid scene name",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
     if (!getLive().isValidTrackName(action.trackName)) {
-      throw createValidationError(`Invalid track name`, [...path, "trackName"]);
+      throw {
+        Error: `Invalid track name: ${action.trackName}`,
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  stopClip: (action: StopClipAction, path: Path) => {
+  stopClip: (
+    action: StopClipAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidSceneName(action.sceneName)) {
-      throw createValidationError("Invalid scene name", [...path, "sceneName"]);
+      throw {
+        Error: "Invalid scene name",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
     if (!getLive().isValidTrackName(action.trackName)) {
-      throw createValidationError("Invalid track name", [...path, "trackName"]);
+      throw {
+        Error: `Invalid track name: ${action.trackName}`,
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  overdubLoop: (action: OverdubLoopAction, path: Path) => {
+  overdubLoop: (
+    action: OverdubLoopAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidSceneName(action.sceneName)) {
-      throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
+      throw {
+        Error: "Invalid scene name",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
     if (!getLive().isValidTrackName(action.trackName)) {
-      throw createValidationError(`Invalid track name`, [...path, "trackName"]);
+      throw {
+        Error: `Invalid track name: ${action.trackName}`,
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  tempo: (action: TempoAction, path: Path) => {
+  tempo: (
+    action: TempoAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (typeof action.tempo !== "number") {
-      throw createValidationError("Invalid tempo value", [...path, "enabled"]);
+      throw {
+        Error: "Invalid tempo value",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  recordLoop: (action: RecordLoopAction, path: Path) => {
+  recordLoop: (
+    action: RecordLoopAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidSceneName(action.sceneName)) {
-      throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
+      throw {
+        Error: "Invalid scene name",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
     if (!getLive().isValidTrackName(action.trackName)) {
-      throw createValidationError(`Invalid track name`, [...path, "trackName"]);
+      throw {
+        Error: `Invalid track name: ${action.trackName}`,
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
     if (!isValidBarCount(action.barCount)) {
-      throw createValidationError(`Invalid bar count (${action.barCount})`, [
-        ...path,
-        "barCount",
-      ]);
+      throw {
+        Error: "Invalid bar count",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  metronome: (action: MetronomeAction, path: Path) => {
+  metronome: (
+    action: MetronomeAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (typeof action.enable !== "number") {
-      throw createValidationError("Invalid enabled value", [...path, "enable"]);
+      throw {
+        Error: "Invalid enabled value",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  wait: (action: WaitAction, path: Path) => {
+  wait: (
+    action: WaitAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (typeof action.barCount !== "number") {
-      throw createValidationError("Invalid bar count value", [
-        ...path,
-        "barCount",
-      ]);
+      throw {
+        Error: "Invalid bar count",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  memo: (action: MemoAction, path: Path) => {
+  memo: (
+    action: MemoAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (typeof action.memo !== "string") {
-      throw createValidationError("Invalid memo value", [...path, "barCount"]);
+      throw {
+        Error: "Memo value is not a string",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
-  fireScene: (action: FireSceneAction, path: Path) => {
+  fireScene: (
+    action: FireSceneAction,
+    conductor: Conductor,
+    sequence: Sequence,
+    actionIndex: number
+  ) => {
     if (!getLive().isValidSceneName(action.sceneName)) {
-      throw createValidationError(`Invalid scene name`, [...path, "sceneName"]);
+      throw {
+        Error: "Invalid scene name",
+        Conductor: conductor.name,
+        Sequence: sequence.name,
+        ActionIndex: actionIndex,
+      } satisfies ValidationError;
     }
   },
 };

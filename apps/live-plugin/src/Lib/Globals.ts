@@ -1,6 +1,7 @@
 import { IdGenerator } from "@loop-conductor/common";
 import { ConductorModel } from "./ConductorModel";
 import { Live } from "./Live";
+import { LogManager } from "./LogManager";
 import { MidiManager } from "./MidiManager";
 import { PadsManager } from "./PadsManager";
 import { TaskManager } from "./TaskManager";
@@ -11,6 +12,7 @@ const globalName = "main";
 interface GlobalAttributes {
   idGenerator: IdGenerator;
   live: Live;
+  logManager: LogManager;
   taskManager: TaskManager;
   padsManager: PadsManager;
   midiManager: MidiManager;
@@ -52,6 +54,9 @@ export function getLive(): Live {
 
 export function getTaskManager(): TaskManager {
   return getGlobal("taskManager");
+}
+export function getLogManager(): LogManager {
+  return getGlobal("logManager");
 }
 
 export function getMidiManager(): MidiManager {

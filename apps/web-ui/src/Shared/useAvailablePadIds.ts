@@ -1,4 +1,4 @@
-import { Conductor } from "@loop-conductor/common";
+import { Conductor, PadCount } from "@loop-conductor/common";
 import { useMemo } from "react";
 
 export function useAvailablePadIds(conductor?: Conductor): number[] {
@@ -13,7 +13,7 @@ export function useAvailablePadIds(conductor?: Conductor): number[] {
 
   return useMemo(() => {
     const availablePadId: number[] = [];
-    for (let i = 1; i <= 12; i++) {
+    for (let i = 1; i <= PadCount; i++) {
       if (!usedPadId.includes(i)) {
         availablePadId.push(i);
       }

@@ -1,6 +1,6 @@
 import { Task, stringifyTime } from "@loop-conductor/common";
 
-type Observer = (tasks: Task[]) => void;
+type Observer = (scheduledTasks: Task[], runnedTask?: Task) => void;
 
 export class TaskManager {
   private scheduledTasks: Record<number, Task> = {};
@@ -20,6 +20,14 @@ export class TaskManager {
     return obj;
   }
 
+  /**
+   * Observe the list of scheduled tasks.
+   *
+   * A new event is emitted each time the list of scheduled tasks is updated.
+   *
+   * @param observer A callback taking as first argument the list of scheduled tasks
+   * @returns A cleanup function to remove the observer
+   */
   public observe(observer: Observer): () => void {
     const i = this.observers.length;
     this.observers.push(observer);
@@ -28,18 +36,13 @@ export class TaskManager {
     };
   }
 
-  public reset() {
+  public clearScheduledTasks() {
     // Remove all the max object
     for (let i = 0; i < this.maxObjects.length; i++) {
       this.parentPatcher.remove(this.maxObjects[i]);
     }
     this.maxObjects = [];
 
-    // Then clean any scheduled task
-    this.clearScheduledTasks();
-  }
-
-  public clearScheduledTasks() {
     // Then clean any scheduled task
     this.scheduledTasks = {};
     this.notifyObservers();
@@ -79,14 +82,14 @@ export class TaskManager {
     if (task) {
       task.callback();
       delete this.scheduledTasks[id];
-      this.notifyObservers();
+      this.notifyObservers(task);
     }
   }
 
-  private notifyObservers() {
+  private notifyObservers(runnedTask?: Task) {
     const task = Object.keys(this.scheduledTasks).map(
       (key) => this.scheduledTasks[key as any]
     );
-    this.observers.forEach((observer) => observer(task));
+    this.observers.forEach((observer) => observer(task, runnedTask));
   }
 }

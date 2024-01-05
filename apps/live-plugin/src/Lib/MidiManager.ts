@@ -3,7 +3,7 @@ import {
   MidiVendorId,
   bufferToMidiCommand,
 } from "@loop-conductor/common";
-import { logError, logInfo } from "./Log";
+import { logError, logInfo } from "./LogManager";
 
 type Observer = (tasks: MidiCommand) => void;
 
@@ -21,6 +21,7 @@ export class MidiManager {
   }
 
   public onSysexByteReceived(byte: number) {
+    logInfo("MidiManager.onSysexByteReceived", byte);
     if (byte === 240) {
       this.buffer = [];
       return;
@@ -52,7 +53,6 @@ export class MidiManager {
     const data = buffer.slice(3);
     const command = bufferToMidiCommand(data);
 
-    logInfo("Received command", command);
     this.observers.forEach((observer) => observer(command));
   }
 }

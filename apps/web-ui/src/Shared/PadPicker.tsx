@@ -23,7 +23,7 @@ interface Props
 }
 
 const GridX = [0, 1, 2, 3];
-const GridY = [0, 1, 2];
+const GridY = [0, 1, 2, 3];
 
 export function PadPicker({ value, onChange, ...props }: Props) {
   const [isOpen, setIsOpen] = useState(false);

@@ -2,7 +2,9 @@
  * General types used throughout the library.
  */
 
-export const PadCount = 12;
+export const PadCountX = 4;
+export const PadCountY = 4;
+export const PadCount = PadCountX * PadCountY;
 
 /**
  * A track name.
@@ -16,11 +18,11 @@ export type TrackName = string | number;
 export type SceneName = string | number;
 
 export interface ValidationError {
-  path: Path;
-  err: string;
+  Conductor?: string;
+  Sequence?: string;
+  ActionIndex?: number;
+  Error: string;
 }
-
-export type Path = (string | number)[];
 
 export interface Clip {
   trackName: TrackName;

@@ -5,34 +5,44 @@ import {
   getConductorManager,
   getGlobal,
   getLive,
+  getLogManager,
   getMidiManager,
   getPadsManager,
   getTaskManager,
   setGlobal,
 } from "./Lib/Globals";
 import { Live } from "./Lib/Live";
-import { logError, logInfo } from "./Lib/Log";
+import { LogManager, logError, logInfo } from "./Lib/LogManager";
 import { MidiManager } from "./Lib/MidiManager";
 import { PadsManager } from "./Lib/PadsManager";
 import { TaskManager } from "./Lib/TaskManager";
 
 enum Outlets {
-  conductor = 0,
-  errors = 1,
+  errorLog = 0,
+  infoLog = 1,
   padConfig = 2,
-  readyBang = 3,
+  cacheConductor = 3,
+  restoreConductorFromCache = 4,
 }
 
-outlets = 4;
+outlets = 5;
 
 function init() {
   logInfo("Initializing");
+  setGlobal("logManager", new LogManager());
   setGlobal("idGenerator", new IdGenerator());
   setGlobal("live", new Live());
   setGlobal("taskManager", new TaskManager(patcher));
   setGlobal("padsManager", new PadsManager());
   setGlobal("midiManager", new MidiManager());
-  outlet(Outlets.readyBang, "bang");
+
+  getLogManager().observe((type, log) => {
+    if (type === "error") {
+      outlet(Outlets.errorLog, JSON.stringify(log));
+    } else {
+      outlet(Outlets.infoLog, JSON.stringify(log));
+    }
+  });
 
   getPadsManager().observe((config) => {
     outlet(Outlets.padConfig, JSON.stringify(config));
@@ -41,48 +51,40 @@ function init() {
   getMidiManager().observe(({ conductor }) => {
     let conductorModel: ConductorModel | null = null;
 
+    logInfo("1");
     try {
       conductorModel = new ConductorModel(conductor);
+      getLogManager().startInfoGroup({
+        Info: "Conductor updated",
+        Conductor: conductor.name,
+      });
+
+      // Send the conductor to the conductor outlet
+      // This will send it to a sub patcher that will persist it
+      // even if live is shut down
+      // This conductor will later be restored by this same patcher
+      // when this js file sends a bang on outlet
+      outlet(Outlets.cacheConductor, JSON.stringify(conductor));
     } catch (conductorOrError) {
-      setGlobal("conductorManager", null);
-
-      // Make sure to reset the task manager after the conductor has been set to null
-      // so it will trigger an event with the right conductor value
-      getTaskManager().reset();
-
       if (isValidationError(conductorOrError)) {
-        logError(
-          "Failed to load conductor",
-          conductorOrError.path,
-          conductorOrError.err
-        );
-        outlet(
-          Outlets.errors,
-          JSON.stringify({
-            error: conductorOrError.err,
-            path: conductorOrError.path.join("."),
-          })
-        );
+        getLogManager().logError(conductorOrError);
         return;
       }
     }
-
     setGlobal("conductorManager", conductorModel);
     // Make sure to reset the task manager after the conductor has been set to null
     // so it will trigger an event with the right conductor value
-    getTaskManager().reset();
-
-    if (conductorModel) {
-      logInfo("Conductor loaded");
-      outlet(Outlets.conductor, JSON.stringify(conductor));
-    }
+    getTaskManager().clearScheduledTasks();
   });
+
+  // Once everything is setup ask the sub patcher to restore the conductor
+  outlet(Outlets.restoreConductorFromCache, "bang");
 }
 
 function reset(): void {
   logInfo("Resetting");
   getConductorManager()?.deleteManagedClips();
-  getTaskManager().reset();
+  getTaskManager().clearScheduledTasks();
 
   getLive().unarmAllTracks();
 }
@@ -98,28 +100,14 @@ function loadConductorFromString(json: string): void {
   let conductorModel: ConductorModel | null = null;
 
   try {
-    logInfo("Loading conductor from string");
     conductorModel = ConductorModel.parse(json);
+    getLogManager().startInfoGroup({
+      Info: "Conductor restored",
+      Conductor: conductorModel?.conductor?.name,
+    });
   } catch (conductorOrError) {
-    setGlobal("conductorManager", null);
-
-    // Make sure to reset the task manager after the conductor has been set to null
-    // so it will trigger an event with the right conductor value
-    getTaskManager().reset();
-
     if (isValidationError(conductorOrError)) {
-      logError(
-        "Failed to load conductor",
-        conductorOrError.path,
-        conductorOrError.err
-      );
-      outlet(
-        Outlets.errors,
-        JSON.stringify({
-          error: conductorOrError.err,
-          path: conductorOrError.path.join("."),
-        })
-      );
+      getLogManager().logError(conductorOrError);
       return;
     }
   }
@@ -127,12 +115,7 @@ function loadConductorFromString(json: string): void {
   setGlobal("conductorManager", conductorModel);
   // Make sure to reset the task manager after the conductor has been set to null
   // so it will trigger an event with the right conductor value
-  getTaskManager().reset();
-
-  if (conductorModel) {
-    logInfo("Conductor loaded");
-    outlet(Outlets.conductor, json);
-  }
+  getTaskManager().clearScheduledTasks();
 }
 
 /**
